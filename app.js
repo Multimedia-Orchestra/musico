@@ -19,8 +19,8 @@ io.sockets.on('connection', function (socket) {
     var myId = (globalCounter += 1);
     socket.emit("getId", myId);
 
-    socket.on("freq", function (freq) {
-        io.sockets.emit("getFreq", freq, myId);
+    socket.on("setInfo", function (info) {
+        io.sockets.emit("getInfo", info, myId);
     });
 
     socket.on("disconnect", function() {
