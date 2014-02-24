@@ -4,7 +4,8 @@ var express = require('express')
   , io = require('socket.io').listen(server)
   , _ = require('underscore')
   , path = require('path')
-  , osc = require('node-osc')
+  , osc = require('osc-min')
+  , udp = require('dgram')
 
 PORT = 80;
 
@@ -13,8 +14,12 @@ app.configure(function() {
 });
 
 
-var client = new osc.Client('localhost', 3333)
-client.send('/address', 100)
+var client = udp.createSocket("udp4");
+// var buf = osc.toBuffer({
+//     address: "/address",
+//     args: 200
+// });
+// client.send(buf, 0, buf.length, 3333, "localhost");
 
 server.listen(PORT);
 
@@ -27,6 +32,25 @@ io.sockets.on('connection', function (socket) {
     //freq, volume
     socket.on("sendUpdate", function (evt) {
         io.sockets.emit("getUpdate", evt, myId);
+        var buf = osc.toBuffer({
+            oscType: "bundle",
+            timetag: evt.timeStamp,
+            elements: [
+            {
+                address: "/acceleration",
+                args: [evt.acceleration.x, evt.acceleration.y, evt.acceleration.z],
+            },
+            {
+                address: "/accelerationIncludingGravity",
+                args: [evt.accelerationIncludingGravity.x, evt.accelerationIncludingGravity.y, evt.accelerationIncludingGravity.z],
+            },
+            {
+                address: "/timeStamp",
+                args: evt.timeStamp,
+            },
+            ],
+        });
+        client.send(buf, 0, buf.length, 3333, "localhost");
     });
 
     socket.on("disconnect", function() {
