@@ -29,16 +29,21 @@ require([
       myId = id;
   });
   socket.on('getInfo', function(info, id) {
-      var osc = getOscillator(id);
-      var gainNode = osc.gainNode;
-      gainNode.gain.value = info.volume;
-      osc.frequency.value = info.freq;
-      // osc.frequency.linearRampToValueAtTime(info.freq, 0);
+      updateOscillator(info, id);
+      updateOthersViews();
   });
   socket.on('disconnected', function(id) {
       getOscillator(id).stop();
       delete oscillators[id];
   });
+
+  function updateOscillator(info, id) {
+      var osc = getOscillator(id);
+      var gainNode = osc.gainNode;
+      gainNode.gain.value = info.volume;
+      osc.frequency.value = info.freq;
+      // osc.frequency.linearRampToValueAtTime(info.freq, 0);
+  }
 
   function getOscillator(id) {
     var osc = oscillators[id];
@@ -56,15 +61,24 @@ require([
     return osc;
   }
 
-  window.lastEvent = undefined;
-  window.ondevicemotion = function(e) {
-      lastEvent = e;
+  window.ondevicemotion = function(evt) {
+      window.evt = evt;
+      var info = eventToInfo(evt);
+      socket.emit("setInfo", info);
+      updateYourView(evt);
   };
 
-  function getMidiNote() {
+  function eventToInfo(evt) {
+      return {
+          freq : getFrequency(evt),
+          volume : getVolume(evt),
+      };
+  }
+
+  function getMidiNote(evt) {
       var diff;
-      if(lastEvent) {
-          diff = lastEvent.accelerationIncludingGravity.y * 2;
+      if(evt) {
+          diff = evt.accelerationIncludingGravity.y * 2;
       } else {
           diff = 0;
       }
@@ -78,48 +92,35 @@ require([
       return midiNote;
   }
 
-  function getFrequency() {
-      var midiNote = getMidiNote();
+  function getFrequency(evt) {
+      var midiNote = getMidiNote(evt);
       return 440 * Math.pow(2, (midiNote - 69) / 12);
-      // return 440 * Math.pow(2, Math.floor(diff) / 12);
-      // return parseInt($("#freqInput").val()) + diff;
   }
 
-  function getVolume() {
-      if(lastEvent) {
+  function getVolume(evt) {
+      if(evt) {
           return Math.sqrt(
-                  lastEvent.acceleration.x * lastEvent.acceleration.x +
-                  lastEvent.acceleration.y * lastEvent.acceleration.y +
-                  lastEvent.acceleration.z * lastEvent.acceleration.z
+                  evt.acceleration.x * evt.acceleration.x +
+                  evt.acceleration.y * evt.acceleration.y +
+                  evt.acceleration.z * evt.acceleration.z
                   ) / 10;
       } else {
           return 0.5;
       }
   }
 
-  window.oldInfo = undefined;
-  // update views, send info again
-  function update() {
-      var freq = getFrequency();
-      var midiNote = getMidiNote();
-      var volume = getVolume();
-      $("body").css("background-color", "hsl(" + (midiNote * 4) + ", 100%, " + (50 + volume * 50) + "%");
-
+  function updateOthersViews() {
       $("#freq").empty();
       _.each(oscillators, function(osc, id) {
           $("<p>" + id +":"+osc.frequency.value+" ("+osc.gainNode.gain.value+")</p>").appendTo("#freq");
       });
-      var volume = getVolume();
-      var info = {
-          freq : freq,
-          volume : volume,
-      };
-      if(!_.isEqual(window.oldInfo, info)) {
-          socket.emit("setInfo", info);
-          oldInfo = info;
-      }
-      requestAnimationFrame(update);
   }
 
-  requestAnimationFrame(update);
+  function updateYourView(evt) {
+      var freq = getFrequency(evt);
+      var volume = getVolume(evt);
+      var midiNote = getMidiNote(evt);
+      $("body").css("background-color", "hsl(" + (midiNote * 4) + ", 100%, " + (50 + volume * 50) + "%");
+  }
+
 });
