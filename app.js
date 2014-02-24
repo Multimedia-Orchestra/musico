@@ -44,11 +44,6 @@ io.sockets.on('connection', function (socket) {
                 address: "/accelerationIncludingGravity",
                 args: [evt.accelerationIncludingGravity.x, evt.accelerationIncludingGravity.y, evt.accelerationIncludingGravity.z],
             },
-            {
-                type: "integer",
-                address: "/timeStamp",
-                args: evt.timeStamp,
-            },
             ],
         });
         client.send(buf, 0, buf.length, 3333, "localhost");
