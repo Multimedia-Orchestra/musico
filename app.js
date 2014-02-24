@@ -4,12 +4,17 @@ var express = require('express')
   , io = require('socket.io').listen(server)
   , _ = require('underscore')
   , path = require('path')
+  , osc = require('node-osc')
 
 PORT = 80;
 
 app.configure(function() {
     app.use(express.static(path.join(__dirname, 'public')));
 });
+
+
+var client = new osc.Client('localhost', 3333)
+client.send('/address', 100)
 
 server.listen(PORT);
 
@@ -19,6 +24,7 @@ io.sockets.on('connection', function (socket) {
     var myId = (globalCounter += 1);
     socket.emit("getId", myId);
 
+    //freq, volume
     socket.on("setInfo", function (info) {
         io.sockets.emit("getInfo", info, myId);
     });
