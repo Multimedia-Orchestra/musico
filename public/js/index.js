@@ -27,7 +27,7 @@ require([
   socket.on('getId', function(id) {
       myId = id;
   });
-  socket.on('getUpdate', function(evt, id) {
+  socket.on('getMotion', function(evt, id) {
       updateOscillator(evt, id);
       updateOthersViews();
   });
@@ -64,8 +64,13 @@ require([
   window.ondevicemotion = function(originalEvent) {
       var evt = _.pick(originalEvent, "acceleration", "accelerationIncludingGravity", "timeStamp");
       window.evt = evt;
-      socket.emit("sendUpdate", evt);
+      socket.emit("sendMotion", evt);
       updateYourView(evt);
+  };
+  window.ondeviceorientation = function(originalEvent) {
+      console.log("orientation", originalEvent);
+      var evt = _.pick(originalEvent, "alpha", "beta", "gamma");
+      socket.emit("sendOrientation", evt);
   };
 
   function eventToInfo(evt) {

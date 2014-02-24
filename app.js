@@ -30,8 +30,8 @@ io.sockets.on('connection', function (socket) {
     socket.emit("getId", myId);
 
     //freq, volume
-    socket.on("sendUpdate", function (evt) {
-        io.sockets.emit("getUpdate", evt, myId);
+    socket.on("sendMotion", function (evt) {
+        io.sockets.emit("getMotion", evt, myId);
         var buf = osc.toBuffer({
             oscType: "bundle",
             timetag: evt.timeStamp,
@@ -45,10 +45,18 @@ io.sockets.on('connection', function (socket) {
                 args: [evt.accelerationIncludingGravity.x, evt.accelerationIncludingGravity.y, evt.accelerationIncludingGravity.z],
             },
             {
+                type: "integer",
                 address: "/timeStamp",
                 args: evt.timeStamp,
             },
             ],
+        });
+        client.send(buf, 0, buf.length, 3333, "localhost");
+    });
+    socket.on("sendOrientation", function (evt) {
+        var buf = osc.toBuffer({
+            address: "/orientation",
+            args: [evt.alpha, evt.beta, evt.gamma],
         });
         client.send(buf, 0, buf.length, 3333, "localhost");
     });
