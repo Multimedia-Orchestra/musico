@@ -5,7 +5,6 @@ require([
         ], function(
             $, _, io
             ) {
-  $("<script src='http://"+window.location.hostname+":35729/livereload.js'></scr" + "ipt>").appendTo("head");
 
   var context;
   if (typeof AudioContext !== "undefined") {
@@ -28,8 +27,8 @@ require([
   socket.on('getId', function(id) {
       myId = id;
   });
-  socket.on('getInfo', function(info, id) {
-      updateOscillator(info, id);
+  socket.on('getUpdate', function(evt, id) {
+      updateOscillator(evt, id);
       updateOthersViews();
   });
   socket.on('disconnected', function(id) {
@@ -37,7 +36,8 @@ require([
       delete oscillators[id];
   });
 
-  function updateOscillator(info, id) {
+  function updateOscillator(evt, id) {
+      var info = eventToInfo(evt);
       var osc = getOscillator(id);
       var gainNode = osc.gainNode;
       gainNode.gain.value = info.volume;
@@ -61,10 +61,10 @@ require([
     return osc;
   }
 
-  window.ondevicemotion = function(evt) {
+  window.ondevicemotion = function(originalEvent) {
+      var evt = _.pick(originalEvent, "acceleration", "accelerationIncludingGravity", "timeStamp");
       window.evt = evt;
-      var info = eventToInfo(evt);
-      socket.emit("setInfo", info);
+      socket.emit("sendUpdate", evt);
       updateYourView(evt);
   };
 

@@ -25,8 +25,8 @@ io.sockets.on('connection', function (socket) {
     socket.emit("getId", myId);
 
     //freq, volume
-    socket.on("setInfo", function (info) {
-        io.sockets.emit("getInfo", info, myId);
+    socket.on("sendUpdate", function (evt) {
+        io.sockets.emit("getUpdate", evt, myId);
     });
 
     socket.on("disconnect", function() {
