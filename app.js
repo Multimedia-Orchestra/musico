@@ -6,10 +6,13 @@ var express = require('express')
   , path = require('path')
   , osc = require('osc-min')
   , udp = require('dgram')
+  , livereload = require('connect-livereload')
 
-PORT = 80;
+PORT = 3000;
+
 
 app.configure(function() {
+    // app.use(livereload());
     app.use(express.static(path.join(__dirname, 'public')));
 });
 

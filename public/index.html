@@ -16,21 +16,40 @@
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
         <style>
+            html {
+                width: 100%;
+                height: 100%;
+            }
             body {
+                width: 100%;
+                height: 100%;
                 transition: background-color 0.2s;
+            }
+            .musicUI {
+                display: none;
+            }
+
+            #begin {
+                margin: 5% 10%;
+                width: 80%;
+                height: 80%;
             }
         </style>
 
     </head>
     <body>
-        <input id="freqInput" type="number" min=100 max=20000 value=440>
-        <button type="button" class="btn btn-default btn-lg" id="audioOff">
-            <span class="glyphicon glyphicon-volume-off"></span>
-        </button>
-        <button type="button" class="btn btn-default btn-lg" id="audioOn">
-            <span class="glyphicon glyphicon-volume-up"></span>
-        </button>
-        <div id="freq"></div>
+        <button id="begin">Begin Audio</button>
+        <div class="musicUI">
+            <input id="freqInput" type="number" min=100 max=20000 value=440>
+            <button type="button" class="btn btn-default btn-lg" id="audioOff">
+                <span class="glyphicon glyphicon-volume-off"></span>
+            </button>
+            <button type="button" class="btn btn-default btn-lg" id="audioOn">
+                <span class="glyphicon glyphicon-volume-up"></span>
+            </button>
+            <div id="interval"></div>
+            <div id="freq"></div>
+        </div>
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
